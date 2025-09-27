@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,7 @@ export default function Upload() {
   const [category, setCategory] = useState("");
   const [color, setColor] = useState("");
   const [season, setSeason] = useState("");
-  const [tags, setTags] = useState("");
+  const [occasion, setOccasion] = useState("");
   const { toast } = useToast();
 
   const handleDrag = (e: React.DragEvent) => {
@@ -54,7 +55,7 @@ export default function Upload() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile || !itemName || !category) {
       toast({
@@ -65,19 +66,60 @@ export default function Upload() {
       return;
     }
 
-    // Here you would typically upload to Supabase storage and save to database
-    toast({
-      title: "Item Added!",
-      description: `${itemName} has been added to your wardrobe.`,
-    });
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
-    // Reset form
-    setSelectedFile(null);
-    setItemName("");
-    setCategory("");
-    setColor("");
-    setSeason("");
-    setTags("");
+      // Upload image to storage
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('clothing-images')
+        .upload(fileName, selectedFile);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from('clothing-images')
+        .getPublicUrl(fileName);
+
+      // Save item to database
+      const { error: insertError } = await supabase
+        .from('clothing_items')
+        .insert({
+          user_id: user.id,
+          name: itemName,
+          category,
+          color,
+          season,
+          occasion,
+          image_url: data.publicUrl,
+        });
+
+      if (insertError) throw insertError;
+
+      toast({
+        title: "Item Added!",
+        description: `${itemName} has been added to your wardrobe.`,
+      });
+
+      // Reset form
+      setSelectedFile(null);
+      setItemName("");
+      setCategory("");
+      setColor("");
+      setSeason("");
+      setOccasion("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add item to wardrobe.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -221,12 +263,12 @@ export default function Upload() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="tags">Tags (comma separated)</Label>
+                <Label htmlFor="occasion">Occasion</Label>
                 <Input
-                  id="tags"
+                  id="occasion"
                   placeholder="casual, work, formal, party"
-                  value={tags}
-                  onChange={(e) => setTags(e.target.value)}
+                  value={occasion}
+                  onChange={(e) => setOccasion(e.target.value)}
                 />
               </div>
             </CardContent>
