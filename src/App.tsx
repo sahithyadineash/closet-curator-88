@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
 import Upload from "./pages/Upload";
 import Wardrobe from "./pages/Wardrobe";
+import Wash from "./pages/Wash";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -30,7 +31,7 @@ const App = () => (
               <Route path="/wardrobe" element={<ProtectedRoute><Wardrobe /></ProtectedRoute>} />
               <Route path="/avatar" element={<ProtectedRoute><div className="pt-20 pb-20 text-center">Avatar page coming soon!</div></ProtectedRoute>} />
               <Route path="/picks" element={<ProtectedRoute><div className="pt-20 pb-20 text-center">Your Picks page coming soon!</div></ProtectedRoute>} />
-              <Route path="/wash" element={<ProtectedRoute><div className="pt-20 pb-20 text-center">In Wash page coming soon!</div></ProtectedRoute>} />
+              <Route path="/wash" element={<ProtectedRoute><Wash /></ProtectedRoute>} />
               <Route path="/matches" element={<ProtectedRoute><div className="pt-20 pb-20 text-center">Smart Matches page coming soon!</div></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload as UploadIcon, Camera, Image as ImageIcon, Tag, Palette } from "lucide-react";
+import { Upload as UploadIcon, Camera, Image as ImageIcon, Tag, Palette, Scissors, WashingMachine } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { removeBackground, analyzeColors } from "@/lib/ml-utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const categories = [
   "Shirts", "T-Shirts", "Pants", "Jeans", "Dresses", "Skirts", 
@@ -28,6 +30,9 @@ export default function Upload() {
   const [color, setColor] = useState("");
   const [season, setSeason] = useState("");
   const [occasion, setOccasion] = useState("");
+  const [maxUses, setMaxUses] = useState("10");
+  const [removeBackgroundEnabled, setRemoveBackgroundEnabled] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const { toast } = useToast();
 
   const handleDrag = (e: React.DragEvent) => {
@@ -52,6 +57,45 @@ export default function Upload() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
+      // Auto-analyze colors when file is selected
+      analyzeImageColors(e.target.files[0]);
+    }
+  };
+
+  const analyzeImageColors = async (file: File) => {
+    try {
+      const detectedColors = await analyzeColors(file);
+      if (detectedColors.length > 0 && !color) {
+        setColor(detectedColors[0]);
+        toast({
+          title: "Color detected!",
+          description: `We detected ${detectedColors[0]} as the primary color.`,
+        });
+      }
+    } catch (error) {
+      console.error('Color analysis failed:', error);
+    }
+  };
+
+  const handleBackgroundRemoval = async () => {
+    if (!selectedFile) return;
+    
+    setProcessing(true);
+    try {
+      const processedFile = await removeBackground(selectedFile);
+      setSelectedFile(processedFile);
+      toast({
+        title: "Background removed!",
+        description: "The background has been removed from your image.",
+      });
+    } catch (error) {
+      toast({
+        title: "Processing failed",
+        description: "Failed to remove background. Using original image.",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -96,6 +140,9 @@ export default function Upload() {
           color,
           season,
           occasion,
+          max_uses: parseInt(maxUses),
+          current_uses: 0,
+          in_wash: false,
           image_url: data.publicUrl,
         });
 
@@ -113,6 +160,8 @@ export default function Upload() {
       setColor("");
       setSeason("");
       setOccasion("");
+      setMaxUses("10");
+      setRemoveBackgroundEnabled(false);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -156,13 +205,26 @@ export default function Upload() {
                   <div className="space-y-4">
                     <ImageIcon className="h-12 w-12 mx-auto text-primary" />
                     <p className="text-sm font-medium">{selectedFile.name}</p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setSelectedFile(null)}
-                    >
-                      Remove
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleBackgroundRemoval}
+                        disabled={processing}
+                      >
+                        <Scissors className="h-4 w-4 mr-1" />
+                        {processing ? "Processing..." : "Remove BG"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedFile(null)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -270,6 +332,35 @@ export default function Upload() {
                   value={occasion}
                   onChange={(e) => setOccasion(e.target.value)}
                 />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="maxUses">Max Uses Before Wash</Label>
+                  <Select value={maxUses} onValueChange={setMaxUses}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select max uses" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 use</SelectItem>
+                      <SelectItem value="3">3 uses</SelectItem>
+                      <SelectItem value="5">5 uses</SelectItem>
+                      <SelectItem value="10">10 uses</SelectItem>
+                      <SelectItem value="15">15 uses</SelectItem>
+                      <SelectItem value="20">20 uses</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <WashingMachine className="h-4 w-4" />
+                    Wash Settings
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Item will automatically go to wash after {maxUses} uses
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

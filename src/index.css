@@ -8,48 +8,48 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 320 100% 99%;
+    --background: 320 50% 96%;
     --foreground: 240 10% 3.9%;
 
-    --card: 0 0% 100%;
+    --card: 320 30% 98%;
     --card-foreground: 240 10% 3.9%;
 
-    --popover: 0 0% 100%;
+    --popover: 320 30% 98%;
     --popover-foreground: 240 10% 3.9%;
 
     /* Fashion-forward primary colors */
-    --primary: 280 100% 70%;
+    --primary: 280 80% 55%;
     --primary-foreground: 0 0% 98%;
-    --primary-glow: 285 100% 85%;
+    --primary-glow: 285 80% 70%;
 
-    --secondary: 330 100% 95%;
-    --secondary-foreground: 280 100% 30%;
+    --secondary: 330 60% 88%;
+    --secondary-foreground: 280 80% 25%;
 
-    --muted: 320 20% 95%;
+    --muted: 320 30% 90%;
     --muted-foreground: 240 5% 64.9%;
 
-    --accent: 200 100% 85%;
-    --accent-foreground: 200 100% 20%;
+    --accent: 200 70% 70%;
+    --accent-foreground: 200 80% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 320 20% 90%;
-    --input: 320 20% 95%;
-    --ring: 280 100% 70%;
+    --border: 320 30% 85%;
+    --input: 320 30% 92%;
+    --ring: 280 80% 55%;
 
     /* Fashion gradients */
-    --gradient-fashion: linear-gradient(135deg, hsl(280 100% 70%), hsl(320 100% 75%));
-    --gradient-wardrobe: linear-gradient(180deg, hsl(200 100% 95%), hsl(280 50% 95%));
-    --gradient-avatar: linear-gradient(45deg, hsl(330 100% 90%), hsl(200 100% 90%));
+    --gradient-fashion: linear-gradient(135deg, hsl(280 80% 55%), hsl(320 80% 60%));
+    --gradient-wardrobe: linear-gradient(180deg, hsl(200 60% 88%), hsl(280 40% 88%));
+    --gradient-avatar: linear-gradient(45deg, hsl(330 60% 80%), hsl(200 60% 80%));
     
     /* Fashion shadows */
-    --shadow-fashion: 0 10px 30px -10px hsl(280 100% 70% / 0.3);
-    --shadow-soft: 0 4px 20px -5px hsl(320 50% 85% / 0.4);
+    --shadow-fashion: 0 10px 30px -10px hsl(280 80% 55% / 0.4);
+    --shadow-soft: 0 4px 20px -5px hsl(320 40% 75% / 0.5);
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 320 30% 96%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
 
@@ -57,60 +57,60 @@ All colors MUST be HSL.
 
     --sidebar-primary-foreground: 0 0% 98%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 320 20% 92%;
 
     --sidebar-accent-foreground: 240 5.9% 10%;
 
-    --sidebar-border: 220 13% 91%;
+    --sidebar-border: 320 25% 88%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 320 100% 99%;
+    --background: 240 15% 8%;
+    --foreground: 320 80% 95%;
 
-    --card: 240 10% 7%;
-    --card-foreground: 320 100% 99%;
+    --card: 240 15% 12%;
+    --card-foreground: 320 80% 95%;
 
-    --popover: 240 10% 7%;
-    --popover-foreground: 320 100% 99%;
+    --popover: 240 15% 12%;
+    --popover-foreground: 320 80% 95%;
 
-    --primary: 280 100% 80%;
-    --primary-foreground: 240 10% 3.9%;
-    --primary-glow: 285 100% 90%;
+    --primary: 280 70% 65%;
+    --primary-foreground: 240 15% 8%;
+    --primary-glow: 285 70% 75%;
 
-    --secondary: 240 5% 15%;
-    --secondary-foreground: 280 100% 85%;
+    --secondary: 240 10% 18%;
+    --secondary-foreground: 280 70% 75%;
 
-    --muted: 240 5% 15%;
+    --muted: 240 10% 18%;
     --muted-foreground: 240 5% 64.9%;
 
-    --accent: 200 100% 40%;
-    --accent-foreground: 200 100% 95%;
+    --accent: 200 60% 50%;
+    --accent-foreground: 200 80% 90%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5% 20%;
-    --input: 240 5% 15%;
-    --ring: 280 100% 80%;
+    --border: 240 10% 22%;
+    --input: 240 10% 18%;
+    --ring: 280 70% 65%;
 
     /* Dark mode fashion gradients */
-    --gradient-fashion: linear-gradient(135deg, hsl(280 100% 50%), hsl(320 100% 55%));
-    --gradient-wardrobe: linear-gradient(180deg, hsl(240 10% 10%), hsl(280 30% 15%));
-    --gradient-avatar: linear-gradient(45deg, hsl(330 50% 20%), hsl(200 50% 20%));
+    --gradient-fashion: linear-gradient(135deg, hsl(280 70% 45%), hsl(320 70% 50%));
+    --gradient-wardrobe: linear-gradient(180deg, hsl(240 15% 15%), hsl(280 25% 18%));
+    --gradient-avatar: linear-gradient(45deg, hsl(330 40% 25%), hsl(200 40% 25%));
     
     /* Dark mode shadows */
-    --shadow-fashion: 0 10px 30px -10px hsl(280 100% 50% / 0.5);
-    --shadow-soft: 0 4px 20px -5px hsl(320 50% 30% / 0.6);
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
+    --shadow-fashion: 0 10px 30px -10px hsl(280 70% 45% / 0.6);
+    --shadow-soft: 0 4px 20px -5px hsl(320 40% 35% / 0.7);
+    --sidebar-background: 240 10% 15%;
+    --sidebar-foreground: 240 8% 90%;
     --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-accent: 240 8% 20%;
+    --sidebar-accent-foreground: 240 8% 90%;
+    --sidebar-border: 240 8% 20%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }

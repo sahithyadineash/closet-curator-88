@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Grid, List, Heart, Edit, Trash2, Shirt } from "lucide-react";
+import { Search, Filter, Grid, List, Heart, Edit, Trash2, Shirt, WashingMachine, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getSmartMatches } from "@/lib/ml-utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const categories = [
   "all", "shirts", "t-shirts", "pants", "jeans", "dresses", 
@@ -28,6 +30,9 @@ export default function Wardrobe() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterColor, setFilterColor] = useState("all");
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [smartMatches, setSmartMatches] = useState<any[]>([]);
+  const [loadingMatches, setLoadingMatches] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -82,12 +87,103 @@ export default function Wardrobe() {
     }
   };
 
+  const handleSendToWash = async (itemId: string) => {
+    try {
+      const { error } = await supabase
+        .from('clothing_items')
+        .update({ in_wash: true })
+        .eq('id', itemId);
+
+      if (error) throw error;
+
+      setItems(items.map(item => 
+        item.id === itemId ? { ...item, in_wash: true } : item
+      ));
+      
+      toast({
+        title: "Sent to wash",
+        description: "The item has been moved to your wash list.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to send item to wash.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUseItem = async (itemId: string) => {
+    try {
+      const item = items.find(i => i.id === itemId);
+      if (!item) return;
+
+      const newUses = (item.current_uses || 0) + 1;
+      const shouldWash = newUses >= (item.max_uses || 10);
+
+      const { error } = await supabase
+        .from('clothing_items')
+        .update({ 
+          current_uses: newUses,
+          in_wash: shouldWash
+        })
+        .eq('id', itemId);
+
+      if (error) throw error;
+
+      setItems(items.map(i => 
+        i.id === itemId 
+          ? { ...i, current_uses: newUses, in_wash: shouldWash }
+          : i
+      ));
+
+      if (shouldWash) {
+        toast({
+          title: "Item needs washing",
+          description: "This item has reached its maximum uses and has been sent to wash.",
+        });
+      } else {
+        toast({
+          title: "Item used",
+          description: `${newUses}/${item.max_uses || 10} uses recorded.`,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to record item usage.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGetMatches = async (item: any) => {
+    if (!user) return;
+    
+    setSelectedItem(item);
+    setLoadingMatches(true);
+    
+    try {
+      const matches = await getSmartMatches(user.id, item);
+      setSmartMatches(matches);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to get smart matches.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingMatches(false);
+    }
+  };
+
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (item.occasion && item.occasion.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = filterCategory === "all" || item.category === filterCategory;
     const matchesColor = filterColor === "all" || item.color === filterColor;
-    return matchesSearch && matchesCategory && matchesColor;
+    const notInWash = !item.in_wash; // Filter out items in wash
+    return matchesSearch && matchesCategory && matchesColor && notInWash;
   });
 
   if (loading) {
@@ -254,6 +350,87 @@ export default function Wardrobe() {
                     </div>
                   )}
                   <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => handleUseItem(item.id)}
+                      className="flex-1"
+                    >
+                      Use ({item.current_uses || 0}/{item.max_uses || 10})
+                    </Button>
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => handleGetMatches(item)}
+                          className="flex-1"
+                        >
+                          <Sparkles className="h-4 w-4 mr-1" />
+                          Matches
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl">
+                        <DialogHeader>
+                          <DialogTitle>Smart Matches for {selectedItem?.name}</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                          {loadingMatches ? (
+                            <div className="col-span-full text-center py-8">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                              <p>Finding perfect matches...</p>
+                            </div>
+                          ) : smartMatches.length > 0 ? (
+                            smartMatches.map((match) => (
+                              <Card key={match.id} className="overflow-hidden">
+                                <div className="aspect-square bg-muted/30 relative overflow-hidden">
+                                  <img 
+                                    src={match.image_url || "/placeholder.svg"} 
+                                    alt={match.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  <div className="absolute top-2 right-2">
+                                    <Badge variant="secondary" className="text-xs">
+                                      {match.matchScore}% match
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <CardContent className="p-3">
+                                  <h4 className="font-medium text-sm mb-1">{match.name}</h4>
+                                  <div className="flex flex-wrap gap-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {match.category}
+                                    </Badge>
+                                    {match.color && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {match.color}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))
+                          ) : (
+                            <div className="col-span-full text-center py-8">
+                              <p className="text-muted-foreground">No matches found for this item.</p>
+                            </div>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => handleSendToWash(item.id)}
+                      className="flex-1"
+                    >
+                      <WashingMachine className="h-4 w-4 mr-1" />
+                      Wash
+                    </Button>
+                  </div>
+                  <div className="flex gap-2 mt-2">
                     <Button size="sm" variant="outline" className="flex-1">
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
