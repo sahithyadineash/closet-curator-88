@@ -19,8 +19,11 @@ export type Database = {
           category: string
           color: string | null
           created_at: string
+          current_uses: number | null
           id: string
           image_url: string | null
+          in_wash: boolean | null
+          max_uses: number | null
           name: string
           occasion: string | null
           season: string | null
@@ -31,8 +34,11 @@ export type Database = {
           category: string
           color?: string | null
           created_at?: string
+          current_uses?: number | null
           id?: string
           image_url?: string | null
+          in_wash?: boolean | null
+          max_uses?: number | null
           name: string
           occasion?: string | null
           season?: string | null
@@ -43,8 +49,11 @@ export type Database = {
           category?: string
           color?: string | null
           created_at?: string
+          current_uses?: number | null
           id?: string
           image_url?: string | null
+          in_wash?: boolean | null
+          max_uses?: number | null
           name?: string
           occasion?: string | null
           season?: string | null

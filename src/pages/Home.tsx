@@ -93,7 +93,7 @@ export default function Home() {
             </Dialog>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Digital Wardrobe
+            VWardrobe
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Welcome back! {profile?.display_name || user?.email || "Fashion enthusiast"}

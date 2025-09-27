@@ -142,7 +142,7 @@ export default function Auth() {
             <User className="h-8 w-8 text-primary" />
           </div>
           <CardTitle className="text-2xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Welcome to Digital Wardrobe
+            Welcome to VWardrobe
           </CardTitle>
           <CardDescription>
             Sign in to your account or create a new one
