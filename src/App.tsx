@@ -12,6 +12,7 @@ import Wardrobe from "./pages/Wardrobe";
 import Avatar from "./pages/Avatar";
 import Wash from "./pages/Wash";
 import Auth from "./pages/Auth";
+import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,8 +27,10 @@ const App = () => (
           <div className="min-h-screen">
             <Navigation />
             <Routes>
+              <Route path="/landing" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
               <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
               <Route path="/wardrobe" element={<ProtectedRoute><Wardrobe /></ProtectedRoute>} />
               <Route path="/avatar" element={<ProtectedRoute><Avatar /></ProtectedRoute>} />
