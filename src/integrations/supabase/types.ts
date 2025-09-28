@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      avatar_preferences: {
+        Row: {
+          body_type: string | null
+          created_at: string
+          hair_color: string | null
+          id: string
+          skin_tone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body_type?: string | null
+          created_at?: string
+          hair_color?: string | null
+          id?: string
+          skin_tone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body_type?: string | null
+          created_at?: string
+          hair_color?: string | null
+          id?: string
+          skin_tone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       clothing_items: {
         Row: {
           category: string
