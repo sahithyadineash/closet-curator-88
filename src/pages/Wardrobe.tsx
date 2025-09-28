@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getSmartMatches } from "@/lib/ml-utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SmartMatch } from "@/components/SmartMatch";
 
 const categories = [
   "all", "shirts", "t-shirts", "pants", "jeans", "dresses", 
@@ -31,8 +32,6 @@ export default function Wardrobe() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterColor, setFilterColor] = useState("all");
   const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [smartMatches, setSmartMatches] = useState<any[]>([]);
-  const [loadingMatches, setLoadingMatches] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -157,25 +156,7 @@ export default function Wardrobe() {
     }
   };
 
-  const handleGetMatches = async (item: any) => {
-    if (!user) return;
-    
-    setSelectedItem(item);
-    setLoadingMatches(true);
-    
-    try {
-      const matches = await getSmartMatches(user.id, item);
-      setSmartMatches(matches);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to get smart matches.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingMatches(false);
-    }
-  };
+
 
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -365,59 +346,20 @@ export default function Wardrobe() {
                         <Button 
                           size="sm" 
                           variant="outline" 
-                          onClick={() => handleGetMatches(item)}
+                          onClick={() => setSelectedItem(item)}
                           className="flex-1"
                         >
                           <Sparkles className="h-4 w-4 mr-1" />
-                          Matches
+                          AI Matches
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-4xl">
+                      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>Smart Matches for {selectedItem?.name}</DialogTitle>
+                          <DialogTitle>AI Smart Matches for {selectedItem?.name}</DialogTitle>
                         </DialogHeader>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-                          {loadingMatches ? (
-                            <div className="col-span-full text-center py-8">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                              <p>Finding perfect matches...</p>
-                            </div>
-                          ) : smartMatches.length > 0 ? (
-                            smartMatches.map((match) => (
-                              <Card key={match.id} className="overflow-hidden">
-                                <div className="aspect-square bg-muted/30 relative overflow-hidden">
-                                  <img 
-                                    src={match.image_url || "/placeholder.svg"} 
-                                    alt={match.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                  <div className="absolute top-2 right-2">
-                                    <Badge variant="secondary" className="text-xs">
-                                      {match.matchScore}% match
-                                    </Badge>
-                                  </div>
-                                </div>
-                                <CardContent className="p-3">
-                                  <h4 className="font-medium text-sm mb-1">{match.name}</h4>
-                                  <div className="flex flex-wrap gap-1">
-                                    <Badge variant="outline" className="text-xs">
-                                      {match.category}
-                                    </Badge>
-                                    {match.color && (
-                                      <Badge variant="outline" className="text-xs">
-                                        {match.color}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            ))
-                          ) : (
-                            <div className="col-span-full text-center py-8">
-                              <p className="text-muted-foreground">No matches found for this item.</p>
-                            </div>
-                          )}
-                        </div>
+                        {selectedItem && user && (
+                          <SmartMatch targetItem={selectedItem} userId={user.id} />
+                        )}
                       </DialogContent>
                     </Dialog>
                     <Button 

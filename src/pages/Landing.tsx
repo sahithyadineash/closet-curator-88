@@ -1,26 +1,47 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Play, ArrowRight } from "lucide-react";
-// @ts-ignore
+import { ArrowRight } from "lucide-react";
 import introVideo from "@/assets/intro-video.MOV";
 
 export default function Landing() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showButton, setShowButton] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
-      video.addEventListener('loadedmetadata', () => {
+      const handleLoadedMetadata = () => {
+        setVideoLoaded(true);
         setTimeout(() => setShowButton(true), 2000);
-      });
+      };
       
-      video.addEventListener('ended', () => {
+      const handleEnded = () => {
         setShowButton(true);
-      });
+      };
+
+      const handleError = () => {
+        setVideoError(true);
+        setShowButton(true); // Show button immediately if video fails
+      };
+
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      video.addEventListener('ended', handleEnded);
+      video.addEventListener('error', handleError);
+
+      // Cleanup event listeners
+      return () => {
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        video.removeEventListener('ended', handleEnded);
+        video.removeEventListener('error', handleError);
+      };
+    } else {
+      // If no video element, show button after delay
+      setTimeout(() => setShowButton(true), 1000);
     }
   }, []);
 
@@ -34,18 +55,26 @@ export default function Landing() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-primary/10 via-background to-accent/10">
-      {/* Video Background */}
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover"
-        autoPlay
-        muted
-        playsInline
-      >
-        <source src={introVideo} type="video/mp4" />
-        <source src={introVideo} type="video/quicktime" />
-        Your browser does not support the video tag.
-      </video>
+      {/* Video Background - Only show if no error */}
+      {!videoError && (
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          muted
+          playsInline
+          poster="/placeholder.svg"
+        >
+          <source src="/intro-video.mp4" type="video/mp4" />
+          <source src={introVideo} type="video/quicktime" />
+          Your browser does not support the video tag.
+        </video>
+      )}
+
+      {/* Fallback Background for when video fails or isn't loaded */}
+      {(videoError || !videoLoaded) && (
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/30 animate-pulse" />
+      )}
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/30" />
@@ -71,7 +100,6 @@ export default function Landing() {
             `}
             disabled={isTransitioning}
           >
-            <Play className="mr-2 h-5 w-5" />
             {isTransitioning ? "Starting..." : "Get Started"}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
